@@ -1,0 +1,19 @@
+services:
+  astrix:
+    networks:
+      - default
+      - traefik
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: ${TRAEFIK_NETWORK:-traefik}
+      traefik.http.routers.astrix.rule: Host(`${ASTRIX_HOST:-astrix.localhost}`)
+      traefik.http.routers.astrix.entrypoints: ${TRAEFIK_ENTRYPOINT:-websecure}
+      traefik.http.routers.astrix.tls: 'true'
+      traefik.http.routers.astrix.tls.certresolver: ${TRAEFIK_CERT_RESOLVER:-letsencrypt}
+      traefik.http.routers.astrix.service: astrix
+      traefik.http.services.astrix.loadbalancer.server.port: '8333'
+
+networks:
+  traefik:
+    name: ${TRAEFIK_NETWORK:-traefik}
+    external: true

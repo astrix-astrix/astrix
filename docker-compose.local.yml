@@ -1,0 +1,110 @@
+name: astrix-ts
+
+services:
+  gateway:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '${GATEWAY_PORT:-8333}:8333'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      app:
+        condition: service_healthy
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '${POSTGRES_PORT}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--port', '6579', '--requirepass', '${REDIS_PASSWORD}']
+    ports:
+      - '${REDIS_PORT}:6579'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-p', '6579', '-a', '${REDIS_PASSWORD}', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  sdk:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: sdk-dev
+    volumes:
+      - ./sdk:/workspace/sdk
+      - /workspace/sdk/node_modules
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api-dev
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6579
+    volumes:
+      - ./api:/workspace/api
+      - ./sdk:/workspace/sdk
+      - /workspace/api/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      sdk:
+        condition: service_started
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/health >/dev/null 2>&1 || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: app-dev
+    restart: unless-stopped
+    environment:
+      PUBLIC_API_URL: ${APP_PUBLIC_API_URL:-}
+    volumes:
+      - ./app:/workspace/app
+      - ./sdk:/workspace/sdk
+      - /workspace/app/node_modules
+    depends_on:
+      api:
+        condition: service_healthy
+      sdk:
+        condition: service_started
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/admin >/dev/null 2>&1 || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,33 @@
+{
+  "name": "@astrix/release-notes",
+  "version": "0.0.0",
+  "description": "Astrix release notes generator for Changesets",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint .",
+    "test:unit": "vitest run"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@changesets/get-github-info": "^0.8.0"
+  },
+  "devDependencies": {
+    "@changesets/types": "^6.1.0",
+    "@types/node": "^24",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "engines": {
+    "node": ">=24.17.0 <25"
+  }
+}

@@ -1,0 +1,11 @@
+:8333 {
+	@admin path /admin /admin/*
+
+	handle @admin {
+		reverse_proxy app:3001
+	}
+
+	handle {
+		reverse_proxy api:3000
+	}
+}

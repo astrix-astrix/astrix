@@ -1,0 +1,4 @@
+services:
+  astrix:
+    ports:
+      - '${GATEWAY_PORT:-8333}:8333'

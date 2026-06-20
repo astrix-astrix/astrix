@@ -1,0 +1,6 @@
+services:
+  astrix:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: astrix
