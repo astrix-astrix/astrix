@@ -1,7 +1,7 @@
 {
 	"name": "@astrix/app",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -18,7 +18,7 @@
 		"test:e2e": "playwright install chromium && playwright test"
 	},
 	"dependencies": {
-		"@astrix/sdk": "0.0.0"
+		"@astrix/sdk": "0.1.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

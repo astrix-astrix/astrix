@@ -1,6 +1,6 @@
 {
   "name": "@astrix/release-notes",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Astrix release notes generator for Changesets",
   "private": true,
   "type": "module",
